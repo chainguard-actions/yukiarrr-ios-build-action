@@ -1,0 +1,42 @@
+name: Test iOS Build Action - p12-key-path and p12-cer-path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create dummy project and certificate files
+        run: |
+          mkdir -p /tmp/dummy-project
+          mkdir -p /tmp/dummy-certs
+          echo "dummy-p12-key-content" > /tmp/dummy-certs/key.p12
+          echo "dummy-p12-cer-content" > /tmp/dummy-certs/cert.cer
+          echo "dummy-mobileprovision-content" > /tmp/dummy-certs/app.mobileprovision
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          project-path: /tmp/dummy-project/App.xcodeproj
+          code-signing-identity: "iPhone Distribution"
+          team-id: "ABCDEF1234"
+          p12-key-path: /tmp/dummy-certs/key.p12
+          p12-cer-path: /tmp/dummy-certs/cert.cer
+          mobileprovision-path: /tmp/dummy-certs/app.mobileprovision
+          certificate-password: ""
+          export-method: app-store
+          configuration: Release
+          output-path: /tmp/output.ipa
+
+      - name: Assert action failed (no Xcode available)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail without Xcode, but got outcome '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when Xcode is not available (p12-key-path + p12-cer-path + mobileprovision-path)"
