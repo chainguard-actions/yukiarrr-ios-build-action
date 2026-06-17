@@ -1,0 +1,34 @@
+name: Test workspace and enterprise export method
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Test action with workspace path and enterprise export method
+        id: action
+        uses: .
+        with:
+          p12-key-base64: "ZmFrZWtleQ=="
+          p12-cer-base64: "ZmFrZWNlcnQ="
+          mobileprovision-base64: "ZmFrZW1vYmlsZXByb3Zpc2lvbg=="
+          project-path: "nonexistent/App.xcodeproj"
+          workspace-path: "nonexistent/App.xcworkspace"
+          code-signing-identity: "iPhone Distribution"
+          team-id: "FAKETEAMID"
+          export-method: "enterprise"
+          configuration: "Release"
+          scheme: "App"
+          output-path: "output.ipa"
+        continue-on-error: true
+      - name: Assert action failed due to missing workspace/project
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail when workspace/project path does not exist, got outcome=$OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when workspace/project path does not exist"
