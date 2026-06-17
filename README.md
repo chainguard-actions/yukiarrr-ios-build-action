@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v1.11.0 | [`v1.11.0`](https://github.com/chainguard-actions/yukiarrr-ios-build-action/tree/v1.11.0) | [`d6253d4`](https://github.com/yukiarrr/ios-build-action/commit/d6253d4ffba9d5bae8d5e199dfbd08f17f797981) |
+| v1.11.1 | [`v1.11.1`](https://github.com/chainguard-actions/yukiarrr-ios-build-action/tree/v1.11.1) | [`c14646a`](https://github.com/yukiarrr/ios-build-action/commit/c14646af220b07c2f0ca066920036b5e76a40a74) |
 
 ## Privacy
 
