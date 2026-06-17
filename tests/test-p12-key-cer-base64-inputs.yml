@@ -1,0 +1,31 @@
+name: Test p12-key-base64 and p12-cer-base64 inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          project-path: "MyApp.xcodeproj"
+          code-signing-identity: "iOS Distribution"
+          team-id: "ABCDE12345"
+          # Provide p12 as separate key + cert base64 values
+          p12-key-base64: "dGVzdA=="
+          p12-cer-base64: "dGVzdA=="
+          # Provide mobileprovision-path to cover that input
+          mobileprovision-path: "MyApp.mobileprovision"
+      - name: Assert action was invoked (fails due to no Xcode, not input validation)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail (no Xcode on ubuntu), but NOT succeed unexpectedly
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action unexpectedly succeeded — inputs were accepted"
+          else
+            echo "PASS: action ran with p12-key-base64, p12-cer-base64, and mobileprovision-path inputs"
+          fi

@@ -1,0 +1,33 @@
+name: Test testflight increment-build-number validation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          project-path: "MyApp.xcodeproj"
+          code-signing-identity: "iOS Distribution"
+          team-id: "ABCDE12345"
+          # Provide dummy p12-base64 so P12 validation passes
+          p12-base64: "dGVzdA=="
+          # Provide dummy mobileprovision-base64 so mobileprovision validation passes
+          mobileprovision-base64: "dGVzdA=="
+          # Set increment-build-number to testflight without required API key inputs
+          increment-build-number: "testflight"
+          # Missing: bundle-identifier, app-store-connect-api-key-id,
+          #          app-store-connect-api-key-issuer-id, app-store-connect-api-key-base64
+      - name: Assert action failed with testflight validation error
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail due to missing testflight API key inputs, but outcome was '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when testflight increment-build-number was set without required API key inputs"

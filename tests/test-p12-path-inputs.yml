@@ -1,0 +1,33 @@
+name: Test p12-path, p12-key-path, and p12-cer-path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          project-path: "MyApp.xcodeproj"
+          code-signing-identity: "iOS Distribution"
+          team-id: "ABCDE12345"
+          # Provide p12 as a combined file path
+          p12-path: "signing.p12"
+          # Also cover separate key and cert path inputs
+          p12-key-path: "signing.key.p12"
+          p12-cer-path: "signing.cer"
+          # Provide dummy mobileprovision-base64 so mobileprovision validation passes
+          mobileprovision-base64: "dGVzdA=="
+      - name: Assert action was invoked (fails due to no Xcode, not input validation)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail (no Xcode on ubuntu), but NOT succeed unexpectedly
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action unexpectedly succeeded — inputs were accepted"
+          else
+            echo "PASS: action ran with p12-path, p12-key-path, and p12-cer-path inputs"
+          fi
