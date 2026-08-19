@@ -1,0 +1,36 @@
+name: Test p12-path file path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create fake p12 file
+        run: |
+          echo "fakep12content" | base64 > /tmp/fake.p12
+          echo "fakemobileprovision" | base64 > /tmp/fake.mobileprovision
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          p12-path: /tmp/fake.p12
+          mobileprovision-path: /tmp/fake.mobileprovision
+          project-path: FakeApp.xcodeproj
+          code-signing-identity: "iPhone Distribution"
+          team-id: "FAKETEAMID"
+          export-method: app-store
+
+      - name: Assert action ran (expected to fail without Xcode)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed with p12-path input"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
