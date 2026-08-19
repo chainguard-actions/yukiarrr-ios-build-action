@@ -1,4 +1,4 @@
-name: Test p12-path, p12-key-path, and p12-cer-path inputs
+name: Test p12 path-based inputs
 on:
   workflow_dispatch:
 jobs:
@@ -13,21 +13,20 @@ jobs:
           project-path: "MyApp.xcodeproj"
           code-signing-identity: "iOS Distribution"
           team-id: "ABCDE12345"
-          # Provide p12 as a combined file path
-          p12-path: "signing.p12"
-          # Also cover separate key and cert path inputs
-          p12-key-path: "signing.key.p12"
-          p12-cer-path: "signing.cer"
-          # Provide dummy mobileprovision-base64 so mobileprovision validation passes
-          mobileprovision-base64: "dGVzdA=="
-      - name: Assert action was invoked (fails due to no Xcode, not input validation)
+          # Use path-based p12 inputs (key + cert pair via paths)
+          p12-key-path: "/tmp/fake.p12key"
+          p12-cer-path: "/tmp/fake.cer"
+          # Also provide p12-path (combined p12 file via path)
+          p12-path: "/tmp/fake.p12"
+          # Provide mobileprovision-path as well
+          mobileprovision-path: "/tmp/fake.mobileprovision"
+      - name: Assert action failed (no real Xcode/files available)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # The action should fail (no Xcode on ubuntu), but NOT succeed unexpectedly
-          if [ "$OUTCOME" = "success" ]; then
-            echo "WARN: action unexpectedly succeeded — inputs were accepted"
-          else
-            echo "PASS: action ran with p12-path, p12-key-path, and p12-cer-path inputs"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail (no real Xcode or certificate files), but got outcome=$OUTCOME"
+            exit 1
           fi
+          echo "PASS: action correctly failed when path-based p12/mobileprovision inputs point to non-existent files"
