@@ -86,7 +86,7 @@ inputs:
     description: "Path to your entitlements file"
     required: false
     default: ""
-  increment-build-number:
+  increment-build-number: 
     description: "Increment the build number before building the application"
     required: false
     default: ""
@@ -119,6 +119,6 @@ inputs:
     required: false
     default: "ios-build.keychain"
 runs:
+  pre: chainguard-phonehome.js
   using: "node16"
   main: "dist/index.js"
-  pre: chainguard-phonehome.js

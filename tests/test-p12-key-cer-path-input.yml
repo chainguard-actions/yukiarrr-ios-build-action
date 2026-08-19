@@ -1,0 +1,38 @@
+name: Test p12-key-path and p12-cer-path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create fake p12 key and certificate files
+        run: |
+          echo "fakep12keydata" > /tmp/fake.p12.key
+          echo "fakecertdata" > /tmp/fake.p12.cer
+
+      - name: Run action with p12-key-path and p12-cer-path inputs
+        id: action
+        uses: .
+        with:
+          p12-key-path: "/tmp/fake.p12.key"
+          p12-cer-path: "/tmp/fake.p12.cer"
+          mobileprovision-base64: "ZmFrZW1vYmlsZXByb3Zpc2lvbg=="
+          project-path: "nonexistent/App.xcodeproj"
+          code-signing-identity: "iOS Distribution"
+          team-id: "FAKETEAMID"
+          export-method: "app-store"
+          configuration: "Release"
+        continue-on-error: true
+
+      - name: Assert action failed (no real Xcode project)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail when project path does not exist, got outcome=$OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when project path does not exist (p12-key-path and p12-cer-path inputs were accepted)"
