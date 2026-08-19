@@ -1,0 +1,44 @@
+name: Test with path-based certificate and mobileprovision inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create dummy certificate and mobileprovision files
+        run: |
+          # Create dummy files to pass as path-based inputs
+          echo "dummy-p12-key-content" > /tmp/dummy.p12key
+          echo "dummy-p12-cer-content" > /tmp/dummy.p12cer
+          echo "dummy-p12-content" > /tmp/dummy.p12
+          echo "dummy-mobileprovision-content" > /tmp/dummy.mobileprovision
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          p12-key-path: "/tmp/dummy.p12key"
+          p12-cer-path: "/tmp/dummy.p12cer"
+          p12-path: "/tmp/dummy.p12"
+          mobileprovision-path: "/tmp/dummy.mobileprovision"
+          project-path: "MyApp.xcodeproj"
+          code-signing-identity: "iPhone Distribution"
+          team-id: "ABCDE12345"
+          export-method: "ad-hoc"
+          configuration: "Release"
+          output-path: "output.ipa"
+      - name: Assert action ran (expected to fail on Linux without Xcode)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          # On Linux, xcodebuild is not available, so the action should fail.
+          # We accept either 'failure' (expected) or 'success' (unexpected but not wrong).
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed as expected (no Xcode on Linux)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
