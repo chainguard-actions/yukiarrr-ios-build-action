@@ -4,8 +4,13 @@
   "version": "v1.13.0",
   "commit_sha": "48c93c1dc2f7c88440784d5da980dac286741ac4",
   "url": "https://github.com/yukiarrr/ios-build-action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/yukiarrr/ios-build-action/v1.13.0/sha256-d17c81fca6351afd3904ee47de37f487016163b32ea590b13e327b532689bb92.tar.gz",
+    "sha256": "d17c81fca6351afd3904ee47de37f487016163b32ea590b13e327b532689bb92",
+    "size_bytes": 241383
+  }
 }
